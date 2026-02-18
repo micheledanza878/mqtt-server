@@ -58,20 +58,20 @@ const client = mqtt.connect(options);
 client.on('connect', () => {
     console.log(`[MQTT] ✅ Connesso al broker su ${MQTT_HOST}:${MQTT_PORT}`);
     
-    // Sottoscrizione ai topic rimappati dal Bridge
-    // Il bridge mappa accesscontrol/apromixrfid/demo/ -> accesscontrol/apromixrfid/aggregatore/
-    const subscribeTopic = 'accesscontrol/apromixrfid/aggregatore/#';
+    // Sottoscrizione ampliata per catturare TUTTO il traffico accesscontrol
+    const subscribeTopic = 'accesscontrol/#';
     
     client.subscribe(subscribeTopic, (err) => {
         if (!err) {
-            console.log(`[MQTT] 📡 In ascolto sui topic del Bridge: ${subscribeTopic}`);
+            console.log(`[MQTT] 📡 In ascolto su tutto il ramo: ${subscribeTopic}`);
         }
     });
 });
 
 client.on('message', (topic, message) => {
     const messageStr = message.toString();
-    console.log(`[DEBUG] Messaggio ricevuto su topic: ${topic}`);
+    // LOG RAW - Identifica ogni messaggio che attraversa il broker
+    console.log(`[RAW-DEBUG] Topic: ${topic}`);
     
     try {
         const payload = JSON.parse(messageStr);
