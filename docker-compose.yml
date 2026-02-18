@@ -8,7 +8,7 @@ services:
     ports:
       - "1883:1883"
       - "8883:8883"
-    # Volumi rimossi per permettere l'avvio pulito e il caricamento manuale
+    # Volumi rimossi completamente per permettere l'avvio manuale
     restart: always
 
   node-app:
@@ -19,4 +19,5 @@ services:
     environment:
       - MQTT_HOST=mqtt-broker
       - MQTT_PORT=8883
+    # Volumi rimossi completamente
     restart: always
