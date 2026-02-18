@@ -10,7 +10,9 @@ services:
       - ./mosquitto/config:/mosquitto/config
       - ./mosquitto/data:/mosquitto/data
       - ./mosquitto/log:/mosquitto/log
-      - ./certs:/mosquitto/config/certs:ro
+      # Local fallback, Dokploy will use its own /files mount
+      - ./certs:/files:ro
+    command: mosquitto -c /files/mosquitto.conf
     restart: always
 
   node-app:

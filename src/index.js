@@ -8,6 +8,18 @@ const MQTT_PORT = process.env.MQTT_PORT || 8883;
 const MQTT_USER = process.env.MQTT_USER;
 const MQTT_PASS = process.env.MQTT_PASS;
 
+// Caricamento del certificato CA (da Env Variable o File)
+let caContent;
+if (process.env.MQTT_CA_CERT) {
+    // Se passata come variabile d'ambiente (comodo su Dokploy)
+    caContent = process.env.MQTT_CA_CERT;
+} else if (fs.existsSync('./certs/ca.crt')) {
+    // Fallback locale al file
+    caContent = fs.readFileSync('./certs/ca.crt');
+} else {
+    console.warn('[MQTT] ⚠️ Attenzione: Nessun certificato CA trovato (MQTT_CA_CERT o ./certs/ca.crt). La connessione potrebbe fallire.');
+}
+
 // Opzioni di connessione TLS
 const options = {
     host: MQTT_HOST,
@@ -16,8 +28,8 @@ const options = {
     username: MQTT_USER,
     password: MQTT_PASS,
     rejectUnauthorized: true, // Verifica il certificato del broker
-    ca: [fs.readFileSync('./certs/ca.crt')], // La CA che ha firmato il certificato del broker
-    reconnectPeriod: 5000, // Tenta la riconnessione ogni 5 secondi
+    ca: caContent ? [caContent] : undefined,
+    reconnectPeriod: 5000,
     connectTimeout: 30 * 1000,
 };
 
