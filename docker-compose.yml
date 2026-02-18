@@ -3,12 +3,24 @@ version: '3.8'
 services:
   mqtt-broker:
     image: eclipse-mosquitto:latest
-    container_name: mosquitto-cloud-locale
-    restart: always
+    container_name: mqtt-broker
     ports:
-      - "1883:1883"   # Porta MQTT standard
-      - "9001:9001"   # Porta per WebSocket (utile in futuro)
+      - "8883:8883"
     volumes:
-      - ./config:/mosquitto/config
-      - ./data:/mosquitto/data
-      - ./log:/mosquitto/log
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+      - ./certs:/mosquitto/config/certs:ro
+    restart: always
+
+  node-app:
+    build: .
+    container_name: mqtt-backend
+    depends_on:
+      - mqtt-broker
+    environment:
+      - MQTT_HOST=mqtt-broker # Nome del servizio nel network docker
+      - MQTT_PORT=8883
+    volumes:
+      - ./certs:/usr/src/app/certs:ro
+    restart: always

@@ -1,0 +1,19 @@
+# Dipendenze
+node_modules/
+package-lock.json
+
+# Certificati (MOLTO IMPORTANTE)
+certs/
+mosquitto/data/
+mosquitto/log/
+
+# Variabili d'ambiente
+.env
+
+# Script di utilità locale
+generate-certs.ps1
+
+# Log di sistema e file temporanei
+*.log
+npm-debug.log*
+.DS_Store
