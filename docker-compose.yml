@@ -4,6 +4,7 @@ services:
   mqtt-broker:
     image: eclipse-mosquitto:latest
     container_name: mqtt-broker
+    user: root
     ports:
       - "8883:8883"
     volumes:

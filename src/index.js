@@ -11,13 +11,15 @@ const MQTT_PASS = process.env.MQTT_PASS;
 // Caricamento del certificato CA (da Env Variable o File)
 let caContent;
 if (process.env.MQTT_CA_CERT) {
-    // Se passata come variabile d'ambiente (comodo su Dokploy)
     caContent = process.env.MQTT_CA_CERT;
+} else if (fs.existsSync('/files/ca.crt')) {
+    // Percorso predefinito per i File Mount di Dokploy
+    caContent = fs.readFileSync('/files/ca.crt');
 } else if (fs.existsSync('./certs/ca.crt')) {
-    // Fallback locale al file
+    // Fallback locale
     caContent = fs.readFileSync('./certs/ca.crt');
 } else {
-    console.warn('[MQTT] ⚠️ Attenzione: Nessun certificato CA trovato (MQTT_CA_CERT o ./certs/ca.crt). La connessione potrebbe fallire.');
+    console.warn('[MQTT] ⚠️ Attenzione: Nessun certificato CA trovato. (Controllati: MQTT_CA_CERT, /files/ca.crt, ./certs/ca.crt)');
 }
 
 // Opzioni di connessione TLS
