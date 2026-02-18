@@ -31,11 +31,16 @@ const options = {
     protocol: 'mqtts',
     username: MQTT_USER,
     password: MQTT_PASS,
-    rejectUnauthorized: true, // Verifica il certificato del broker
+    // Se non abbiamo una CA, disabilitiamo la verifica per permettere cert self-signed
+    rejectUnauthorized: process.env.MQTT_REJECT_UNAUTHORIZED === 'true' ? true : (caContent ? true : false),
     ca: caContent ? [caContent] : undefined,
     reconnectPeriod: 5000,
     connectTimeout: 30 * 1000,
 };
+
+if (!options.rejectUnauthorized) {
+    console.warn('[MQTT] ⚠️ Attenzione: Verifica del certificato disabilitata (rejectUnauthorized: false).');
+}
 
 const client = mqtt.connect(options);
 
