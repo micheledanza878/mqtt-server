@@ -3,7 +3,7 @@ const fs = require('fs');
 require('dotenv').config();
 
 // Configurazione tramite variabili d'ambiente (best practice per Dokploy)
-const MQTT_HOST = process.env.MQTT_HOST || 'mqtt-broker'; // Nome del servizio in docker-compose
+const MQTT_HOST = process.env.MQTT_HOST || 'mqtt-broker'; 
 const MQTT_PORT = process.env.MQTT_PORT || 8883;
 const MQTT_USER = process.env.MQTT_USER;
 const MQTT_PASS = process.env.MQTT_PASS;
@@ -24,6 +24,12 @@ if (process.env.MQTT_CA_CERT) {
     console.warn('[MQTT] ⚠️ Attenzione: Nessun certificato CA trovato.');
 }
 
+console.log('[DEBUG] --- Configurazione MQTT ---');
+console.log(`[DEBUG] Host: ${MQTT_HOST}`);
+console.log(`[DEBUG] Port: ${MQTT_PORT}`);
+console.log(`[DEBUG] MQTT_REJECT_UNAUTHORIZED (Env): ${process.env.MQTT_REJECT_UNAUTHORIZED}`);
+console.log(`[DEBUG] CA Content presente: ${!!caContent}`);
+
 // Opzioni di connessione TLS
 const options = {
     host: MQTT_HOST,
@@ -31,16 +37,19 @@ const options = {
     protocol: 'mqtts',
     username: MQTT_USER,
     password: MQTT_PASS,
-    // Se non abbiamo una CA, disabilitiamo la verifica per permettere cert self-signed
-    rejectUnauthorized: process.env.MQTT_REJECT_UNAUTHORIZED === 'true' ? true : (caContent ? true : false),
+    // Logica di sicurezza corretta:
+    // Se MQTT_REJECT_UNAUTHORIZED è 'false', accettiamo tutto.
+    // Altrimenti, se abbiamo una CA, verifichiamo il certificato.
+    // Se non abbiamo nulla, rejectUnauthorized sarà false per default (su Dokploy).
+    rejectUnauthorized: process.env.MQTT_REJECT_UNAUTHORIZED === 'false' ? false : 
+                       (process.env.MQTT_REJECT_UNAUTHORIZED === 'true' ? true : !!caContent),
     ca: caContent ? [caContent] : undefined,
     reconnectPeriod: 5000,
     connectTimeout: 30 * 1000,
 };
 
-if (!options.rejectUnauthorized) {
-    console.warn('[MQTT] ⚠️ Attenzione: Verifica del certificato disabilitata (rejectUnauthorized: false).');
-}
+console.log(`[DEBUG] Verifica certificato attiva (rejectUnauthorized): ${options.rejectUnauthorized}`);
+console.log('[DEBUG] ----------------------------');
 
 const client = mqtt.connect(options);
 
@@ -49,8 +58,6 @@ const client = mqtt.connect(options);
 client.on('connect', () => {
     console.log(`[MQTT] ✅ Connesso al broker su ${MQTT_HOST}:${MQTT_PORT}`);
     
-    // Iscrizione ai topic dei terminali usando il wildcard '+'
-    // devices/terminale_1/data, devices/terminale_2/data, ecc.
     client.subscribe('devices/+/data', (err) => {
         if (!err) {
             console.log('[MQTT] 📡 In ascolto su tutti i terminali (devices/+/data)');
@@ -61,11 +68,9 @@ client.on('connect', () => {
 client.on('message', (topic, message) => {
     try {
         const payload = JSON.parse(message.toString());
-        const terminalId = topic.split('/')[1]; // Estrae l'ID dal topic
+        const terminalId = topic.split('/')[1]; 
         
         console.log(`[DATA] Ricevuto da ${terminalId}:`, payload);
-        
-        // Qui chiamerai la tua funzione per salvare su DB o processare i dati
         handleTerminalData(terminalId, payload);
         
     } catch (e) {
@@ -78,12 +83,11 @@ client.on('error', (err) => {
 });
 
 client.on('offline', () => {
-    console.warn('[MQTT] ⚠️ Il broker è offline. Tentativo di riconnessione...');
+    process.stdout.write('.'); // Log compatto per offline
 });
 
 // --- LOGICA DI BUSINESS ---
 
 function handleTerminalData(id, data) {
-    // Esempio: logica di filtraggio o salvataggio
-    // if (data.temperature > 40) console.log(`ALERT: Surriscaldamento su ${id}!`);
+    // Implementazione logica di business
 }
