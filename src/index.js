@@ -75,15 +75,20 @@ client.on('message', (topic, message) => {
     
     try {
         const payload = JSON.parse(messageStr);
-        // Struttura topic: accesscontrol/apromixrfid/aggregatore/ID_TERMINALE/SUB_TOPIC
         const parts = topic.split('/');
-        const terminalId = parts[3]; 
-        const subTopic = parts[4];
         
-        if (subTopic === 'lettura') {
-            console.log(`[LECTURE] 🪪 Nuova timbratura da ${terminalId}:`, payload);
+        // Cerca 'lettura' o altri sotto-topic indipendentemente dalla profondità
+        const isLettura = parts.includes('lettura');
+        
+        // Identifica il Terminal ID (solitamente dopo 'aggregatore', 'demo' o 'teamsystem')
+        // In base ai log, è solitamente al terzo o quarto posto
+        let terminalId = parts[3];
+        let subTopic = parts[parts.length - 1]; // L'ultimo segmento è solitamente l'azione/dato
+        
+        if (isLettura) {
+            console.log(`[LECTURE] 🪪 Timbratura rilevata sul topic ${topic}:`, payload);
         } else {
-            console.log(`[DATA] Ricevuto da ${terminalId} (${subTopic || 'root'}):`, payload);
+            console.log(`[DATA] Ricevuto da ${terminalId} (${subTopic}):`, payload);
         }
         
         handleTerminalData(terminalId, payload, subTopic);
