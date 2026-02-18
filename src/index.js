@@ -58,17 +58,24 @@ const client = mqtt.connect(options);
 client.on('connect', () => {
     console.log(`[MQTT] ✅ Connesso al broker su ${MQTT_HOST}:${MQTT_PORT}`);
     
-    client.subscribe('devices/+/data', (err) => {
+    // Sottoscrizione ai topic rimappati dal Bridge
+    // Il bridge mappa accesscontrol/apromixrfid/demo/ -> accesscontrol/apromixrfid/aggregatore/
+    const subscribeTopic = 'accesscontrol/apromixrfid/aggregatore/#';
+    
+    client.subscribe(subscribeTopic, (err) => {
         if (!err) {
-            console.log('[MQTT] 📡 In ascolto su tutti i terminali (devices/+/data)');
+            console.log(`[MQTT] 📡 In ascolto sui topic del Bridge: ${subscribeTopic}`);
         }
     });
 });
 
 client.on('message', (topic, message) => {
+    console.log(`[DEBUG] Messaggio ricevuto su topic: ${topic}`);
     try {
         const payload = JSON.parse(message.toString());
-        const terminalId = topic.split('/')[1]; 
+        // Estrazione ID terminale dalla struttura: accesscontrol/apromixrfid/aggregatore/Q2-F8DC7A47789C/
+        const parts = topic.split('/');
+        const terminalId = parts[4] || 'unknown'; 
         
         console.log(`[DATA] Ricevuto da ${terminalId}:`, payload);
         handleTerminalData(terminalId, payload);
