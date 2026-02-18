@@ -3,7 +3,7 @@ const fs = require('fs');
 require('dotenv').config();
 
 // Configurazione tramite variabili d'ambiente (best practice per Dokploy)
-const MQTT_HOST = process.env.MQTT_HOST || 'mqtt-broker'; 
+const MQTT_HOST = process.env.MQTT_HOST || 'mqtt-server'; 
 const MQTT_PORT = process.env.MQTT_PORT || 8883;
 const MQTT_USER = process.env.MQTT_USER;
 const MQTT_PASS = process.env.MQTT_PASS;

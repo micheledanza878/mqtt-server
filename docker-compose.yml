@@ -1,14 +1,14 @@
 version: '3.8'
 
 services:
-  mqtt-broker:
+  mqtt-server:
     image: eclipse-mosquitto:latest
-    container_name: mqtt-broker
+    container_name: mqtt-server-cloud
     user: root
     ports:
       - "1883:1883"
       - "8883:8883"
-    # Volumi rimossi completamente per permettere l'avvio manuale
+    # Volumi rimossi completamente
     restart: always
 
   node-app:
