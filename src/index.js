@@ -73,12 +73,18 @@ client.on('message', (topic, message) => {
     console.log(`[DEBUG] Messaggio ricevuto su topic: ${topic}`);
     try {
         const payload = JSON.parse(message.toString());
-        // Estrazione ID terminale dalla struttura: accesscontrol/apromixrfid/aggregatore/Q2-F8DC7A47789C/
+        // Struttura topic: accesscontrol/apromixrfid/aggregatore/ID_TERMINALE/SUB_TOPIC
         const parts = topic.split('/');
-        const terminalId = parts[4] || 'unknown'; 
+        const terminalId = parts[3]; 
+        const subTopic = parts[4];
         
-        console.log(`[DATA] Ricevuto da ${terminalId}:`, payload);
-        handleTerminalData(terminalId, payload);
+        if (subTopic === 'lettura') {
+            console.log(`[LECTURE] 🪪 Nuova timbratura da ${terminalId}:`, payload);
+        } else {
+            console.log(`[DATA] Ricevuto da ${terminalId} (${subTopic}):`, payload);
+        }
+        
+        handleTerminalData(terminalId, payload, subTopic);
         
     } catch (e) {
         console.error(`[ERROR] Messaggio non valido su ${topic}:`, message.toString());
