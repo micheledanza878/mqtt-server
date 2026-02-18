@@ -6,15 +6,12 @@ services:
     container_name: mqtt-broker
     user: root
     ports:
+      - "1883:1883"
       - "8883:8883"
     volumes:
+      - ./mosquitto/config:/mosquitto/config
       - ./mosquitto/data:/mosquitto/data
       - ./mosquitto/log:/mosquitto/log
-      # Mappatura file caricati su Dokploy (Host -> Container)
-      - ../files/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
-      - ../files/ca.crt:/mosquitto/config/certs/ca.crt:ro
-      - ../files/server.crt:/mosquitto/config/certs/server.crt:ro
-      - ../files/server.key:/mosquitto/config/certs/server.key:ro
     restart: always
 
   node-app:
@@ -23,9 +20,6 @@ services:
     depends_on:
       - mqtt-broker
     environment:
-      - MQTT_HOST=mqtt-broker # Nome del servizio nel network docker
+      - MQTT_HOST=mqtt-broker
       - MQTT_PORT=8883
-    volumes:
-      # Mappa la CA anche per l'app Node per validare la connessione
-      - ../files/ca.crt:/files/ca.crt:ro
     restart: always
