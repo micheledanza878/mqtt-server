@@ -8,16 +8,16 @@ services:
     ports:
       - "1883:1883"
       - "8883:8883"
-    # Volumi rimossi completamente
+    # Volumi rimossi completamente per permettere l'avvio manuale
     restart: always
 
   node-app:
     build: .
     container_name: mqtt-backend
     depends_on:
-      - mqtt-broker
+      - mqtt-server
     environment:
-      - MQTT_HOST=mqtt-broker
+      - MQTT_HOST=mqtt-server
       - MQTT_PORT=8883
     # Volumi rimossi completamente
     restart: always
