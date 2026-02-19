@@ -20,6 +20,8 @@ services:
       - MQTT_HOST=mqtt-broker
       - MQTT_PORT=8883
     restart: always
-
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+    networks:
+      - mqtt-terminal-manager-network
+networks:
+  mqtt-terminal-manager-network: # <--- Dichiara la rete di Dokploy come esterna
+    external: true
