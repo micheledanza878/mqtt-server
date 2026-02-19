@@ -124,18 +124,32 @@ async function handleTerminalData(terminalId, payload, subTopic) {
         }
 
         try {
-            console.log(`[HTTP] 📤 Inoltro timbratura per ${terminalId} a ${apiUrl}...`);
-            
-            const response = await axios.post(apiUrl, {
+            const postData = {
                 terminalID: terminalId,
                 payload: payload,
                 sentAt: new Date().toISOString()
-            });
+            };
 
-            console.log(`[HTTP] ✅ API risposta (${response.status}): Inviato correttamente.`);
+            console.log(`[HTTP] 📤 Inizializzazione invio a: ${apiUrl}`);
+            console.log(`[HTTP] 📦 Payload: ${JSON.stringify(postData)}`);
+            
+            const response = await axios.post(apiUrl, postData);
+
+            console.log(`[HTTP] ✅ Risposta ricevuta dal server (${response.status})`);
+            console.log(`[HTTP] 📝 Dati risposta: ${JSON.stringify(response.data)}`);
         } catch (err) {
-            console.error(`[HTTP] ❌ Errore durante l'invio alla API per ${terminalId}:`, err.message);
-            // Qui si potrebbe implementare una coda locale di retry se necessario
+            console.error(`[HTTP] ❌ Errore durante l'invio alla API per ${terminalId}:`);
+            if (err.response) {
+                // Il server ha risposto con uno status fuori dal range 2xx
+                console.error(`[HTTP-ERR] Status: ${err.response.status}`);
+                console.error(`[HTTP-ERR] Data: ${JSON.stringify(err.response.data)}`);
+            } else if (err.request) {
+                // La richiesta è stata fatta ma non è arrivata risposta
+                console.error(`[HTTP-ERR] Nessuna risposta ricevuta. Controlla l'IP/URL: ${apiUrl}`);
+            } else {
+                // Errore nella configurazione della richiesta
+                console.error(`[HTTP-ERR] Messaggio: ${err.message}`);
+            }
         }
     }
 }
