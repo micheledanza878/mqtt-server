@@ -6,7 +6,6 @@ services:
     ports:
       - "1883:1883"
       - "8883:8883"
-    # Volumi rimossi completamente per permettere l'avvio manuale
     restart: always
     volumes:
       - ./mosquitto/config:/mosquitto/config
@@ -21,5 +20,4 @@ services:
     environment:
       - MQTT_HOST=mqtt-server
       - MQTT_PORT=8883
-    # Volumi rimossi completamente
     restart: always
