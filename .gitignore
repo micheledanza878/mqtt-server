@@ -4,8 +4,6 @@ package-lock.json
 
 # Certificati (MOLTO IMPORTANTE)
 certs/
-mosquitto/data/
-mosquitto/log/
 
 # Variabili d'ambiente
 .env
