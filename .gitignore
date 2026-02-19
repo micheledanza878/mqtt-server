@@ -2,8 +2,9 @@
 node_modules/
 package-lock.json
 
-# Certificati (MOLTO IMPORTANTE)
-certs/
+# Certificati (Sbloccati per deploy su repository PRIVATO)
+# certs/
+!mosquitto/config/certs/
 
 # Variabili d'ambiente
 .env
