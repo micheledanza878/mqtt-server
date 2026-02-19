@@ -134,7 +134,7 @@ async function handleTerminalData(terminalId, payload, subTopic) {
             console.log(`[HTTP] 📤 Inizializzazione invio a: ${apiUrl}`);
             console.log(`[HTTP] 📦 Payload: ${JSON.stringify(postData)}`);
             
-            const response = await axios.post(apiUrl, postData);
+            const response = await axios.post(apiUrl, postData, { timeout: 5000 });
 
             console.log(`[HTTP] ✅ Risposta ricevuta dal server (${response.status})`);
             console.log(`[HTTP] 📝 Dati risposta: ${JSON.stringify(response.data)}`);
