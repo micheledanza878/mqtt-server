@@ -10,6 +10,8 @@ services:
     volumes:
       - ./mosquitto/config:/mosquitto/config
       - ./mosquitto/data:/mosquitto/data
+    networks:
+      - mqtt-terminal-manager-network
 
   node-app:
     build: .
