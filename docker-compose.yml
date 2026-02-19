@@ -1,7 +1,7 @@
 services:
-  mqtt-server:
+  mqtt-broker:
     image: eclipse-mosquitto:latest
-    container_name: mqtt-server-cloud
+    container_name: mqtt-broker-cloud
     user: root
     ports:
       - "1883:1883"
@@ -10,14 +10,13 @@ services:
     volumes:
       - ./mosquitto/config:/mosquitto/config
       - ./mosquitto/data:/mosquitto/data
-      - ./mosquitto/log:/mosquitto/log
 
   node-app:
     build: .
     container_name: mqtt-backend
     depends_on:
-      - mqtt-server
+      - mqtt-broker
     environment:
-      - MQTT_HOST=mqtt-server
+      - MQTT_HOST=mqtt-broker
       - MQTT_PORT=8883
     restart: always
