@@ -10,8 +10,7 @@ services:
     volumes:
       - ./mosquitto/config:/mosquitto/config
       - ./mosquitto/data:/mosquitto/data
-    networks:
-      - mqtt-terminal-manager-network
+
 
   node-app:
     build: .
@@ -22,8 +21,4 @@ services:
       - MQTT_HOST=mqtt-broker
       - MQTT_PORT=8883
     restart: always
-    networks:
-      - mqtt-terminal-manager-network
-networks:
-  mqtt-terminal-manager-network: # <--- Dichiara la rete di Dokploy come esterna
-    external: true
+
