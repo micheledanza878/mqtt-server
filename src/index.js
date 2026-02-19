@@ -80,9 +80,9 @@ client.on('message', (topic, message) => {
         // Cerca 'lettura' o altri sotto-topic indipendentemente dalla profondità
         const isLettura = parts.includes('lettura');
         
-        // Identifica il Terminal ID (solitamente dopo 'aggregatore', 'demo' o 'teamsystem')
-        // In base ai log, è solitamente al terzo o quarto posto
-        let terminalId = parts[3];
+        // Identifica il Terminal ID cercando dinamicamente il segmento dopo 'aggregatore'
+        const aggIndex = parts.indexOf('aggregatore');
+        let terminalId = aggIndex !== -1 && parts[aggIndex + 1] ? parts[aggIndex + 1] : 'unknown';
         let subTopic = parts[parts.length - 1]; // L'ultimo segmento è solitamente l'azione/dato
         
         if (isLettura) {
