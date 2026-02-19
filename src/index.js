@@ -1,5 +1,6 @@
 const mqtt = require('mqtt');
 const fs = require('fs');
+const axios = require('axios');
 require('dotenv').config();
 
 // Configurazione tramite variabili d'ambiente (best practice per Dokploy)
@@ -37,10 +38,10 @@ const options = {
     protocol: 'mqtts',
     username: MQTT_USER,
     password: MQTT_PASS,
-    // Logica di sicurezza corretta:
-    // Se MQTT_REJECT_UNAUTHORIZED è 'false', accettiamo tutto.
-    // Altrimenti, se abbiamo una CA, verifichiamo il certificato.
-    // Se non abbiamo nulla, rejectUnauthorized sarà false per default (su Dokploy).
+    // --- PERSISTENZA ---
+    clientId: process.env.MQTT_CLIENT_ID || 'apromix-backend-cloud',
+    clean: false, // Sessione persistente: il broker tiene i messaggi se l'app è offline
+    
     rejectUnauthorized: process.env.MQTT_REJECT_UNAUTHORIZED === 'false' ? false : 
                        (process.env.MQTT_REJECT_UNAUTHORIZED === 'true' ? true : !!caContent),
     ca: caContent ? [caContent] : undefined,
@@ -58,12 +59,12 @@ const client = mqtt.connect(options);
 client.on('connect', () => {
     console.log(`[MQTT] ✅ Connesso al broker su ${MQTT_HOST}:${MQTT_PORT}`);
     
-    // Sottoscrizione ampliata per catturare TUTTO il traffico accesscontrol
+    // Sottoscrizione con QoS 1 per garantire la ricezione dei messaggi persistenti
     const subscribeTopic = 'accesscontrol/#';
     
-    client.subscribe(subscribeTopic, (err) => {
+    client.subscribe(subscribeTopic, { qos: 1 }, (err) => {
         if (!err) {
-            console.log(`[MQTT] 📡 In ascolto su tutto il ramo: ${subscribeTopic}`);
+            console.log(`[MQTT] 📡 In ascolto su tutto il ramo con QoS 1: ${subscribeTopic}`);
         }
     });
 });
@@ -109,6 +110,32 @@ client.on('offline', () => {
 
 // --- LOGICA DI BUSINESS ---
 
-function handleTerminalData(id, data) {
-    // Implementazione logica di business
+/**
+ * Gestisce i dati ricevuti dai terminali e li inoltra via HTTP
+ */
+async function handleTerminalData(terminalId, payload, subTopic) {
+    // Inoltriamo solo le 'letture' (timbrature effettive)
+    if (subTopic === 'lettura') {
+        const apiUrl = process.env.BACKEND_API_URL;
+        
+        if (!apiUrl) {
+            console.warn('[HTTP] ⚠️ BACKEND_API_URL non configurata. Salto inoltro.');
+            return;
+        }
+
+        try {
+            console.log(`[HTTP] 📤 Inoltro timbratura per ${terminalId} a ${apiUrl}...`);
+            
+            const response = await axios.post(apiUrl, {
+                terminalID: terminalId,
+                payload: payload,
+                sentAt: new Date().toISOString()
+            });
+
+            console.log(`[HTTP] ✅ API risposta (${response.status}): Inviato correttamente.`);
+        } catch (err) {
+            console.error(`[HTTP] ❌ Errore durante l'invio alla API per ${terminalId}:`, err.message);
+            // Qui si potrebbe implementare una coda locale di retry se necessario
+        }
+    }
 }

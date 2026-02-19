@@ -16,3 +16,7 @@ generate-certs.ps1
 *.log
 npm-debug.log*
 .DS_Store
+
+
+#Documentazione
+doc/
