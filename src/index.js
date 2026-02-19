@@ -42,8 +42,9 @@ const options = {
     clientId: process.env.MQTT_CLIENT_ID || 'apromix-backend-cloud',
     clean: false, // Sessione persistente: il broker tiene i messaggi se l'app è offline
     
+    // --- SSL/TLS ---
     rejectUnauthorized: process.env.MQTT_REJECT_UNAUTHORIZED === 'false' ? false : 
-                       (process.env.MQTT_REJECT_UNAUTHORIZED === 'true' ? true : !!caContent),
+                       (process.env.MQTT_REJECT_UNAUTHORIZED === 'true' ? true : false), // Default a false se non specificato per evitare blocchi CA
     ca: caContent ? [caContent] : undefined,
     reconnectPeriod: 5000,
     connectTimeout: 30 * 1000,
